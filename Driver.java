@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class Driver {
     public static void main(String[] args) throws IOException {
-    	double[] c1c = {1, -9, 3, 2};
+    	double[] c1c = {1, -9.7, 3, 2};
     	int[] c1e = {2, 0, 3, 1};
     	Polynomial p1 = new Polynomial(c1c, c1e);
     	

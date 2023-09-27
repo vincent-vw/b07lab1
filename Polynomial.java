@@ -14,38 +14,37 @@ public class Polynomial {
 		this.exponents = exponents;
 	}
 	public Polynomial(File f) throws FileNotFoundException {
+		// Read polynomial from file
 		Scanner sc = new Scanner(f);
 		String data = sc.next();
-		char[] dataArr = data.toCharArray();
-		// Find the number of terms
-		int numTerms = 1; // At least one term; if see +/-, add 1
-		for(int i=0; i<dataArr.length; i++) {
-			if(dataArr[i] == '+' || dataArr[i] == '-') {
-				numTerms++;
-			}
-		}
+		// Split based on "+" or "-", but keep delimiters
+		String[] dataSplit = data.split("(?=\\+)|(?=\\-)");
 		// Create arrays
-		nonZCoefficients = new double[numTerms];
-		exponents = new int[numTerms];
-		// Add data into arrays
-		int nonZCoeffArrIndex = 0;
-		int exponentsArrIndex = 0;
-		for(int i=0; i<dataArr.length; i++) {
-			if(Character.isDigit(dataArr[i])) {
-				nonZCoefficients[nonZCoeffArrIndex] = Character.getNumericValue(dataArr[i]);
-				if(i != 0 && dataArr[i-1] == '-') nonZCoefficients[nonZCoeffArrIndex] *= -1;
-				nonZCoeffArrIndex++;
-				if(dataArr[i+1] != 'x') exponentsArrIndex++; // If there isn't an "x" after a number, move to the next index in the exponents array
-			}else if(dataArr[i] == 'x') {
-				i++;
-				exponents[exponentsArrIndex] = Character.getNumericValue(dataArr[i]);
-				exponentsArrIndex++;
+		nonZCoefficients = new double[dataSplit.length];
+		exponents = new int[dataSplit.length];
+		// Loop through dataSplit array
+		for(int i=0; i<dataSplit.length; i++) {
+			// Split the element to have the coefficient and exponent separately
+			String[] elementSplit = dataSplit[i].split("x");
+			// Save coefficient
+			nonZCoefficients[i] = Double.parseDouble(elementSplit[0]);
+			// If there is only a coefficient (no exponent)
+			if(elementSplit.length == 1) {
+				exponents[i] = 0;
+			// If there is both a coefficient and exponent
+			}else {
+				exponents[i] = Integer.parseInt(elementSplit[1]); 
 			}
 		}
 		sc.close();
 	}
 
 	public Polynomial add(Polynomial poly) {
+		// Error checking
+		if(poly == null 
+				|| poly.nonZCoefficients.length != poly.exponents.length) {
+			return null;
+		}
 		// Sort exponents
 		sortTwoArrays(nonZCoefficients, exponents);
 		sortTwoArrays(poly.nonZCoefficients, poly.exponents);
@@ -76,8 +75,7 @@ public class Polynomial {
 					thisPolyIndex++;
 				} else {
 					p.nonZCoefficients[i] = poly.nonZCoefficients[argPolyIndex] + nonZCoefficients[thisPolyIndex];
-					p.exponents[i] = poly.exponents[argPolyIndex]; // Both exponents are the same, so just take the
-																	// exponent from any of the two arrays
+					p.exponents[i] = poly.exponents[argPolyIndex];
 					argPolyIndex++;
 					thisPolyIndex++;
 				}
@@ -108,7 +106,12 @@ public class Polynomial {
 	}
 
 	public Polynomial multiply(Polynomial poly) {
-    	// Count how many terms in total (at the end)
+		// Error checking
+		if(poly == null 
+				|| poly.nonZCoefficients.length != poly.exponents.length) {
+			return null;
+		}
+		// Count how many terms in total (at the end)
 		int numTerms = countMaxNumTerms(poly, 1);
 		// Create new object
 		Polynomial p = new Polynomial(new double[numTerms], new int[numTerms]);
@@ -245,5 +248,4 @@ public class Polynomial {
 		}
 		return new Object[] {nonZCoeff, expo};
 	}
-	
 }
