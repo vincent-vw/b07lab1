@@ -8,6 +8,11 @@ import java.util.Scanner;
 public class Polynomial {
 	double[] nonZCoefficients; // Non-zero coefficients of polynomial
 	int[] exponents; // Exponents of polynomial
+	
+	public Polynomial() {
+		this.nonZCoefficients = null;
+		this.exponents = null;
+	}
 
 	public Polynomial(double[] nonZCoefficients, int[] exponents) { // Two arguments now
 		this.nonZCoefficients = nonZCoefficients;
@@ -42,8 +47,14 @@ public class Polynomial {
 	public Polynomial add(Polynomial poly) {
 		// Error checking
 		if(poly == null 
-				|| poly.nonZCoefficients.length != poly.exponents.length) {
+				|| poly.nonZCoefficients != null && poly.nonZCoefficients.length != poly.exponents.length) {
 			return null;
+		}
+		// Check for 0 polynomial
+		if(poly.nonZCoefficients == null) {
+			return new Polynomial(nonZCoefficients, exponents);
+		}else if(nonZCoefficients == null) {
+			return new Polynomial(poly.nonZCoefficients, poly.exponents);
 		}
 		// Sort exponents
 		sortTwoArrays(nonZCoefficients, exponents);
@@ -85,10 +96,18 @@ public class Polynomial {
 		Object[] object = removeZeroCoefficients(p.nonZCoefficients, p.exponents);
 		p.nonZCoefficients = (double[])object[0];
 		p.exponents = (int[])object[1];
+		// Set arrays to null if they are empty
+		if(p.nonZCoefficients.length == 0) {
+			p.nonZCoefficients = null;
+			p.exponents = null;
+		}
 		return p;
 	}
 
 	public double evaluate(double x) {
+		if(nonZCoefficients == null) {
+			return 0;
+		}
 		int polySize = exponents.length;
 		double sum = 0;
 		for (int i = 0; i < polySize; i++) {
@@ -108,8 +127,12 @@ public class Polynomial {
 	public Polynomial multiply(Polynomial poly) {
 		// Error checking
 		if(poly == null 
-				|| poly.nonZCoefficients.length != poly.exponents.length) {
+				|| poly.nonZCoefficients != null && poly.nonZCoefficients.length != poly.exponents.length) {
 			return null;
+		}
+		// Check for 0 polynomial
+		if(poly.nonZCoefficients == null || nonZCoefficients == null) {
+			return new Polynomial();
 		}
 		// Count how many terms in total (at the end)
 		int numTerms = countMaxNumTerms(poly, 1);
@@ -159,13 +182,17 @@ public class Polynomial {
 	public void saveToFile(String filename) throws IOException {
 		FileWriter w = new FileWriter(filename);
 		String poly = "";
-		for(int i=0; i<exponents.length; i++) {
-			if(nonZCoefficients[i] > 0 && i != 0) {
-				poly += "+";
-			}
-			poly += Double.toString(nonZCoefficients[i]);
-			if(exponents[i] != 0) {
-				poly += "x" + Integer.toString(exponents[i]);
+		if(nonZCoefficients == null) {
+			poly = "0";
+		}else {
+			for(int i=0; i<exponents.length; i++) {
+				if(nonZCoefficients[i] > 0 && i != 0) {
+					poly += "+";
+				}
+				poly += Long.toString(Math.round(nonZCoefficients[i]));
+				if(exponents[i] != 0) {
+					poly += "x" + Integer.toString(exponents[i]);
+				}
 			}
 		}
 		w.write(poly);
